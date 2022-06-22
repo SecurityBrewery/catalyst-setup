@@ -1,7 +1,7 @@
 version: '2.2'
 services:
   nginx:
-    image: nginx:1.21
+    image: nginx:1.23
     volumes:
       - ./nginx-ssl.conf:/etc/nginx/nginx.conf:ro
       - ./cert.pem:/etc/nginx/ssl/catalyst-soar.com.cer:ro
