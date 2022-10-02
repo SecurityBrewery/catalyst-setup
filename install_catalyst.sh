@@ -39,15 +39,9 @@ AUTHELIA_HOST=${authelia_addr#"http://"}
 AUTHELIA_HOST=${AUTHELIA_HOST#"https://"}
 
 # reset
-if [ -n "${DEV}" ]; then
-  rm -f docker-compose.yml
-  rm -f authelia/configuration.yml authelia/authelia.key authelia/authelia.key.pub
-  rm -f nginx/nginx.conf
-else
-  curl -sL "https://github.com/SecurityBrewery/catalyst-setup/archive/refs/tags/v0.10.0-rc.1.zip" -o catalyst_install.zip
-  unzip catalyst_install.zip
-  cd "catalyst-install-0.10.0-rc.1"
-fi
+curl -sL "https://github.com/SecurityBrewery/catalyst-setup/archive/refs/tags/v0.10.0-rc.1.zip" -o catalyst_install.zip
+unzip catalyst_install.zip
+cd "catalyst-install-0.10.0-rc.1"
 
 # copy templates
 cp docker-compose.tmpl.yml docker-compose.yml
@@ -84,10 +78,6 @@ sed -i.bak "s#__DOMAIN__#$catalyst_domain#" authelia/configuration.yml
 sed -i.bak "s#__AUTHELIA_HOST__#$AUTHELIA_HOST#" nginx/nginx.conf
 
 # start containers
-if [ -n "${DEV}" ]; then
-  docker compose down --remove-orphans --volumes
-  docker compose rm --volumes --force
-fi
 docker compose pull
 docker compose build --no-cache
 docker compose up --build --force-recreate --detach
@@ -95,10 +85,10 @@ docker compose up --build --force-recreate --detach
 # remove all .bak files
 find . -name "*.bak" -type f -delete
 
-if [ -n "${GENERATE_FAKE_DATA}" ]; then
+if [ "$4" == "generate_fake_data" ]; then
   curl -sL https://github.com/SecurityBrewery/catalyst-faker/releases/download/v0.1.1/catalyst-faker_0.1.1_Linux_x86_64.tar.gz -o catalyst-faker.tar.gz
   tar -xvf catalyst-faker.tar.gz
   rm catalyst-faker.tar.gz
   mv catalyst-faker /usr/local/bin
-  catalyst-faker http://localhost "$INITIAL_API_KEY"
+  catalyst-faker http://localhost/api "$INITIAL_API_KEY"
 fi
