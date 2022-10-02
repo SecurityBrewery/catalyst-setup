@@ -42,9 +42,10 @@ INITIAL_API_KEY=$( openssl rand -hex 64 )
 echo "$INITIAL_API_KEY" > INITIAL_API_KEY
 
 # download catalyst setup
-curl -sL "https://github.com/SecurityBrewery/catalyst-setup/archive/refs/tags/v0.10.0-rc.1.zip" -o catalyst_install.zip
+# curl -sL "https://github.com/SecurityBrewery/catalyst-setup/archive/refs/tags/v0.10.0.zip" -o catalyst_install.zip
+curl -sL "https://github.com/SecurityBrewery/catalyst-setup/archive/refs/heads/v0.10.0.zip" -o catalyst_install.zip
 unzip catalyst_install.zip
-cd "catalyst-install-0.10.0-rc.1"
+cd "catalyst-setup-0.10.0-rc.2"
 
 # generate authelia keys
 openssl genrsa -out authelia/private.pem 4096
