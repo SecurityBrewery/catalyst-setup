@@ -51,12 +51,13 @@ openssl genrsa -out authelia/private.pem 4096
 openssl rsa -in authelia/private.pem -outform PEM -pubout -out authelia/public.pem
 AUTHELIA_CLIENT_SECRET=$( openssl rand -hex 64 )
 AUTHELIA_PRIVATE_KEY=$( tr -d '\n' < authelia/private.pem )
+INITIAL_API_KEY=$( openssl rand -hex 64 )
 
 # adapt docker-compose.yml
 sed -i.bak "s#__SECRET__#$( openssl rand -hex 64 )#" docker-compose.yml
 sed -i.bak "s#__ARANGO_ROOT_PASSWORD__#$( openssl rand -hex 64 )#" docker-compose.yml
 sed -i.bak "s#__S3_PASSWORD__#$( openssl rand -hex 64 )#" docker-compose.yml
-sed -i.bak "s#__INITIAL_API_KEY__#$( openssl rand -hex 64 )#" docker-compose.yml
+sed -i.bak "s#__INITIAL_API_KEY__#$INITIAL_API_KEY#" docker-compose.yml
 sed -i.bak "s#__AUTHELIA_JWT_SECRET__#$( openssl rand -hex 64 )#" docker-compose.yml
 sed -i.bak "s#__AUTHELIA_PRIVATE_KEY__#$AUTHELIA_PRIVATE_KEY#" docker-compose.yml
 sed -i.bak "s#__AUTHELIA_HMAC_SECRET__#$( openssl rand -hex 64 )#" docker-compose.yml
@@ -84,3 +85,11 @@ docker compose up --build --force-recreate --detach
 
 # remove all .bak files
 find . -name "*.bak" -type f -delete
+
+if [ -n "${GENERATE_FAKE_DATA}" ]; then
+  curl -sL https://github.com/SecurityBrewery/catalyst-faker/releases/download/v0.1.1/catalyst-faker_0.1.1_Linux_x86_64.tar.gz -o catalyst-faker.tar.gz
+  tar -xvf catalyst-faker.tar.gz
+  rm catalyst-faker.tar.gz
+  mv catalyst-faker /usr/local/bin
+  catalyst-faker http://localhost "$INITIAL_API_KEY"
+fi
