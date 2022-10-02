@@ -37,11 +37,7 @@ fi
 AUTHELIA_HOST=${authelia_addr#"http://"}
 AUTHELIA_HOST=${AUTHELIA_HOST#"https://"}
 
-# generate authelia keys
-openssl genrsa -out authelia/private.pem 4096
-openssl rsa -in authelia/private.pem -outform PEM -pubout -out authelia/public.pem
-AUTHELIA_CLIENT_SECRET=$( openssl rand -hex 64 )
-AUTHELIA_PRIVATE_KEY=$( tr -d '\n' < authelia/private.pem )
+# create initial api key
 INITIAL_API_KEY=$( openssl rand -hex 64 )
 echo "$INITIAL_API_KEY" > INITIAL_API_KEY
 
@@ -49,6 +45,12 @@ echo "$INITIAL_API_KEY" > INITIAL_API_KEY
 curl -sL "https://github.com/SecurityBrewery/catalyst-setup/archive/refs/tags/v0.10.0-rc.1.zip" -o catalyst_install.zip
 unzip catalyst_install.zip
 cd "catalyst-install-0.10.0-rc.1"
+
+# generate authelia keys
+openssl genrsa -out authelia/private.pem 4096
+openssl rsa -in authelia/private.pem -outform PEM -pubout -out authelia/public.pem
+AUTHELIA_CLIENT_SECRET=$( openssl rand -hex 64 )
+AUTHELIA_PRIVATE_KEY=$( tr -d '\n' < authelia/private.pem )
 
 # copy templates
 cp docker-compose.tmpl.yml docker-compose.yml
