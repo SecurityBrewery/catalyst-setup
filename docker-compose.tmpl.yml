@@ -25,7 +25,7 @@ services:
       S3_PASSWORD: "__S3_PASSWORD__"
       AUTH_BLOCK_NEW: "false"
       AUTH_DEFAULT_ROLES: "analyst"
-      AUTH_ADMIN_USERS: "eve"
+      AUTH_ADMIN_USERS: "admin"
       INITIAL_API_KEY: "__INITIAL_API_KEY__"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock"
