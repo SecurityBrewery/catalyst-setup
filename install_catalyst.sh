@@ -34,11 +34,18 @@ if [ -z "$3" ]; then
 else
     authelia_addr="$3"
 fi
-
 AUTHELIA_HOST=${authelia_addr#"http://"}
 AUTHELIA_HOST=${AUTHELIA_HOST#"https://"}
 
-# reset
+# generate authelia keys
+openssl genrsa -out authelia/private.pem 4096
+openssl rsa -in authelia/private.pem -outform PEM -pubout -out authelia/public.pem
+AUTHELIA_CLIENT_SECRET=$( openssl rand -hex 64 )
+AUTHELIA_PRIVATE_KEY=$( tr -d '\n' < authelia/private.pem )
+INITIAL_API_KEY=$( openssl rand -hex 64 )
+echo "$INITIAL_API_KEY" > INITIAL_API_KEY
+
+# download catalyst setup
 curl -sL "https://github.com/SecurityBrewery/catalyst-setup/archive/refs/tags/v0.10.0-rc.1.zip" -o catalyst_install.zip
 unzip catalyst_install.zip
 cd "catalyst-install-0.10.0-rc.1"
@@ -47,13 +54,6 @@ cd "catalyst-install-0.10.0-rc.1"
 cp docker-compose.tmpl.yml docker-compose.yml
 cp authelia/configuration.tmpl.yml authelia/configuration.yml
 cp nginx/nginx.tmpl.conf nginx/nginx.conf
-
-# generate authelia keys
-openssl genrsa -out authelia/private.pem 4096
-openssl rsa -in authelia/private.pem -outform PEM -pubout -out authelia/public.pem
-AUTHELIA_CLIENT_SECRET=$( openssl rand -hex 64 )
-AUTHELIA_PRIVATE_KEY=$( tr -d '\n' < authelia/private.pem )
-INITIAL_API_KEY=$( openssl rand -hex 64 )
 
 # adapt docker-compose.yml
 sed -i.bak "s#__SECRET__#$( openssl rand -hex 64 )#" docker-compose.yml
@@ -84,11 +84,3 @@ docker compose up --build --force-recreate --detach
 
 # remove all .bak files
 find . -name "*.bak" -type f -delete
-
-if [ "$4" == "generate_fake_data" ]; then
-  curl -sL https://github.com/SecurityBrewery/catalyst-faker/releases/download/v0.1.1/catalyst-faker_0.1.1_Linux_x86_64.tar.gz -o catalyst-faker.tar.gz
-  tar -xvf catalyst-faker.tar.gz
-  rm catalyst-faker.tar.gz
-  mv catalyst-faker /usr/local/bin
-  catalyst-faker http://localhost/api "$INITIAL_API_KEY"
-fi
