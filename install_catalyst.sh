@@ -6,25 +6,33 @@ set -e
 
 # if help flag
 if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
-    echo "Usage: ./install_catalyst.sh <hostname> <authelia_hostname>"
-    echo "Example: ./install_catalyst.sh https://dev.catalyst-soar.com https://dev-authelia.catalyst-soar.com'"
+    echo "Usage: ./install_catalyst.sh <domain> <hostname> <authelia_hostname>"
+    echo "Example: ./install_catalyst.sh catalyst-soar.com https://dev.catalyst-soar.com https://dev-authelia.catalyst-soar.com"
     exit 0
 fi
 
-# set default hostname
+# set default domain
 if [ -z "$1" ]; then
+    echo "No domain provided, using default domain: localhost"
+    catalyst_domain="localhost"
+else
+    catalyst_domain="$1"
+fi
+
+# set default hostname
+if [ -z "$2" ]; then
     echo "No hostname provided, using default: http://localhost"
     catalyst_addr="http://localhost"
 else
-    catalyst_addr="$1"
+    catalyst_addr="$2"
 fi
 
 # set default authelia hostname
-if [ -z "$2" ]; then
+if [ -z "$3" ]; then
     echo "No authelia hostname provided, using default: http://localhost:8082"
     authelia_addr="http://localhost:8082"
 else
-    authelia_addr="$2"
+    authelia_addr="$3"
 fi
 
 AUTHELIA_HOST=${authelia_addr#"http://"}
@@ -70,6 +78,7 @@ sed -i.bak "s#__AUTHELIA_ADDR__#$authelia_addr#" docker-compose.yml
 # adapt authelia configuration.yml
 sed -i.bak "s#__AUTHELIA_CLIENT_SECRET__#$AUTHELIA_CLIENT_SECRET#" authelia/configuration.yml
 sed -i.bak "s#__ADDR__#$catalyst_addr#" authelia/configuration.yml
+sed -i.bak "s#__DOMAIN__#$catalyst_domain#" authelia/configuration.yml
 
 # adapt nginx ngnix.conf
 sed -i.bak "s#__AUTHELIA_HOST__#$AUTHELIA_HOST#" nginx/nginx.conf

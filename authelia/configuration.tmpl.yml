@@ -15,7 +15,7 @@ access_control:
   default_policy: one_factor
 
 session:
-  domain: localhost
+  domain: __DOMAIN__
 
 storage:
   local:
