@@ -1,2 +1,8 @@
-.idea
-.DS_Store
+*.bak
+docker-compose.yml
+authelia/configuration.yml
+nginx/nginx.conf
+
+authelia.key
+authelia.key.pub
+*.pem

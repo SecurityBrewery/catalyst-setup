@@ -1,0 +1,5 @@
+users:
+  bob:
+    displayname: "Bob"
+    password: "$argon2id$v=19$m=65536,t=3,p=4$amxRcURFVUk4TlhPOXFmWg$sPRsvGg9rrqefRp0fFA7wQG3O8OcMnQhj4IckHYPEz8"
+    email: bob@example.com

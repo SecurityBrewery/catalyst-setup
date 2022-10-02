@@ -1,0 +1,76 @@
+version: '2.2'
+services:
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports: [ "80:80", "443:443" ]
+    depends_on: [ catalyst ]
+    networks: [ catalyst ]
+
+  catalyst:
+    image: ghcr.io/securitybrewery/catalyst:v0.10.0-rc.1
+    restart: unless-stopped
+    environment:
+      SECRET: "__SECRET__"
+      EXTERNAL_ADDRESS: __ADDR__
+      OIDC_ISSUER: http://authelia:8082
+      OIDC_AUTH_URL: __AUTHELIA_ADDR__/api/oidc/authorization
+      OIDC_CLIENT_ID: "catalyst"
+      OIDC_CLIENT_SECRET: "__AUTHELIA_CLIENT_SECRET__"
+      ARANGO_DB_HOST: http://arangodb:8529
+      ARANGO_DB_USER: root
+      ARANGO_DB_PASSWORD: "__ARANGO_ROOT_PASSWORD__"
+      S3_PASSWORD: "__S3_PASSWORD__"
+      AUTH_BLOCK_NEW: "false"
+      AUTH_DEFAULT_ROLES: "analyst"
+      AUTH_ADMIN_USERS: "eve"
+      INITIAL_API_KEY: "__INITIAL_API_KEY__"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock"
+    depends_on: [ arangodb, minio, keycloak ]
+    networks: [ catalyst ]
+
+  arangodb:
+    image: arangodb/arangodb:3.8.1
+    restart: unless-stopped
+    environment:
+      ARANGO_ROOT_PASSWORD: "__ARANGO_ROOT_PASSWORD__"
+    volumes:
+      - "arangodb:/var/lib/arangodb3"
+    networks: [ catalyst ]
+
+  minio:
+    image: minio/minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: "__S3_PASSWORD__"
+    volumes:
+      - "minio:/data"
+    command: server /data
+    networks: [ catalyst ]
+
+  authelia:
+    build:
+      context: authelia
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      AUTHELIA_JWT_SECRET: "__AUTHELIA_JWT_SECRET__"
+      AUTHELIA_IDENTITY_PROVIDERS_OIDC_ISSUER_PRIVATE_KEY_FILE: "/config/private.pem"
+      AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET: "__AUTHELIA_HMAC_SECRET__"
+      AUTHELIA_STORAGE_ENCRYPTION_KEY: "__AUTHELIA_STORAGE_ENCRYPTION_KEY__"
+      AUTHELIA_SESSION_SECRET: "__AUTHELIA_SESSION_SECRET__"
+    networks: [ catalyst ]
+    ports:
+      - "8082:8082"
+
+volumes:
+  arangodb:
+  minio:
+
+networks:
+  catalyst:
+    name: catalyst

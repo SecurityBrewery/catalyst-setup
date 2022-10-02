@@ -1,93 +1,75 @@
 version: '2.2'
 services:
-  arangodb:
-    image: arangodb/arangodb:3.8.1
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
     restart: unless-stopped
-    environment:
-      ARANGO_ROOT_PASSWORD: M1qLriWYtac2KQgRIf15xDenrwjqxfpa
-    volumes:
-      - arangodb:/var/lib/arangodb3
-    ulimits:
-      nofile:
-        hard: 1048576
-        soft: 1048576
-    networks: [ catalyst ]
-
-  emitter:
-    image: emitter/server
-    restart: unless-stopped
-    environment:
-      - EMITTER_LICENSE=PfA8ID8izeSlDUlNZgNXo77DQV9QzlNtxTk64WreCXKfDZsREAVXUXwh20UKOZdkALbLTmOytO_iC6mc_twKAQ:3
-    networks: [ catalyst ]
-
-  minio:
-    image: minio/minio:RELEASE.2021-12-10T23-03-39Z
-    restart: unless-stopped
-    environment:
-      MINIO_ROOT_USER: minio
-      MINIO_ROOT_PASSWORD: minio123
-    volumes:
-      - minio:/data
-    command: server /data
-    networks: [ catalyst ]
-
-  postgres:
-    image: postgres:13
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks: [ catalyst ]
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:14.0.0
-    restart: unless-stopped
-    environment:
-      DB_VENDOR: POSTGRES
-      DB_ADDR: postgres
-      DB_DATABASE: keycloak
-      DB_USER: keycloak
-      DB_SCHEMA: public
-      DB_PASSWORD: password
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: RV3AOsWZ12C6CGOvelmZe9Wt0fN09qN6
-      KEYCLOAK_IMPORT: /tmp/realm.json
-      PROXY_ADDRESS_FORWARDING: "true"
-      # KEYCLOAK_FRONTEND_URL: http://localhost:9002
-    volumes:
-      - ./realm.json:/tmp/realm.json
-    depends_on: [ postgres ]
+    ports: [ "80:80", "443:443" ]
+    depends_on: [ catalyst ]
     networks: [ catalyst ]
 
   catalyst:
     image: ghcr.io/securitybrewery/catalyst:main
     restart: unless-stopped
     environment:
-      SECRET: 4ef5b29539b70233dd40c02a1799d25079595565e05a193b09da2c3e60ada1cd
+      SECRET: "4e5bcc65b46d0675a9c9151780344a35b3c6855a4fdbe4a0bae242b375e812dfbfd502bd7d430ac2f3119c34f153bb3f8a6e312d56c586811b72b466f61c1ccd"
       EXTERNAL_ADDRESS: http://localhost
-      OIDC_ISSUER: http://localhost:9002/auth/realms/catalyst
-      OIDC_CLIENT_SECRET: d3ec0d91-b6ea-482d-8a4e-2f5a7ca0b4cb
+      OIDC_ISSUER: http://authelia:8082
+      OIDC_AUTH_URL: http://localhost:8082/api/oidc/authorization
+      OIDC_CLIENT_ID: "catalyst"
+      OIDC_CLIENT_SECRET: "8b1f80a99f2cc87c3c65116b8843afae8d0f11a556252eba04458088fa5c30c3d3f00fe01cf9a6deabe222f4ac5c172d05e79f0dc554dcb7c14f5c3ea53dc136"
       ARANGO_DB_HOST: http://arangodb:8529
-      ARANGO_DB_PASSWORD: M1qLriWYtac2KQgRIf15xDenrwjqxfpa
-      S3_PASSWORD: minio123
-      EMITTER_IO_KEY: A9RysEsPJni8RaHeg_K0FKXQNfBrUyw-
+      ARANGO_DB_USER: root
+      ARANGO_DB_PASSWORD: "35c9df58a427a5ce5a93a8adbe0b0bbf54f5e89c6082bd5e8b35ddb8d1db73b0c6f05ac0619118653a709594495b414a0274482aac53d54173c3d97aa49d4f31"
+      S3_PASSWORD: "f2261e0a38c58febbc96ab429e95d6fa2ed2dae29247a770783f5419c3ce8319a35ae69eaf9bb296ee54ceeffc81a235d4f918f668b129083647cf52903ee211"
       AUTH_BLOCK_NEW: "false"
-      AUTH_ADMIN_USERS: bob
-      INITIAL_API_KEY: d0169af94c40981eb4452a42fae536b6caa9be3a
+      AUTH_DEFAULT_ROLES: "analyst"
+      AUTH_ADMIN_USERS: "eve"
+      INITIAL_API_KEY: "c4523d2bf61aab5710be48bdb09e6081368fdf08bcb96fd03cfdddd62874b8f59c1c4d9d7d1b78b7e40da8d3b698a5673e49bccbdae6f637136dff3a9570fc00"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    depends_on: [ arangodb, emitter, minio, keycloak ]
-    extra_hosts:
-      - "localhost:172.17.0.1"
+      - /var/run/docker.sock:/var/run/docker.sock"
+    depends_on: [ arangodb, minio, keycloak ]
     networks: [ catalyst ]
 
-volumes:
-  minio:
-  postgres_data:
   arangodb:
+    image: arangodb/arangodb:3.8.1
+    restart: unless-stopped
+    environment:
+      ARANGO_ROOT_PASSWORD: "35c9df58a427a5ce5a93a8adbe0b0bbf54f5e89c6082bd5e8b35ddb8d1db73b0c6f05ac0619118653a709594495b414a0274482aac53d54173c3d97aa49d4f31"
+    volumes:
+      - "arangodb:/var/lib/arangodb3"
+    networks: [ catalyst ]
+
+  minio:
+    image: minio/minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: "f2261e0a38c58febbc96ab429e95d6fa2ed2dae29247a770783f5419c3ce8319a35ae69eaf9bb296ee54ceeffc81a235d4f918f668b129083647cf52903ee211"
+    volumes:
+      - "minio:/data"
+    command: server /data
+    networks: [ catalyst ]
+
+  authelia:
+    build:
+      context: authelia
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      AUTHELIA_JWT_SECRET: "c3475aa2831aecedd1073b7a9cb23ec3f35ea199b159256ca58b7e792b22cfd8e17dddd5a1ec3080240f4b16c7665a0e156541a390016a042737a63ae631d579"
+      AUTHELIA_IDENTITY_PROVIDERS_OIDC_ISSUER_PRIVATE_KEY_FILE: "/config/private.pem"
+      AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET: "3448f336e6e735b9175909e55335059820f369afdd751760ce4edf7ab8f42308d49550dfd94f661a12aa6ad49baf4c753fae90c8f132e76586eb42a405185603"
+      AUTHELIA_STORAGE_ENCRYPTION_KEY: "dc4532b173799d900a11f0dade002bed415fd7b31db39b74b98e3dba616a269859c26e419c8cdaa6d510a8ca5b02e14526986962758be92596049843a5f49a3d"
+      AUTHELIA_SESSION_SECRET: "9f656764fcc9f0917ff94c40a1b262db95f6a65439c36bff2491b9068f5c5f8c024bd113254f9cc38dea8035866df0326e393e6ead616a7951902f9a59585674"
+    networks: [ catalyst ]
+    ports:
+      - "8082:8082"
+
+volumes:
+  arangodb:
+  minio:
 
 networks:
   catalyst:
