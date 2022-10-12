@@ -28,7 +28,7 @@ services:
       AUTH_ADMIN_USERS: "admin"
       INITIAL_API_KEY: "__INITIAL_API_KEY__"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock"
+      - "/var/run/docker.sock:/var/run/docker.sock"
     depends_on: [ arangodb, minio, authelia ]
     networks: [ catalyst ]
 
