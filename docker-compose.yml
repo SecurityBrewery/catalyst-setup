@@ -63,7 +63,7 @@ services:
     networks: [ catalyst ]
 
   catalyst:
-    image: ghcr.io/securitybrewery/catalyst:v0.9.2
+    image: ghcr.io/securitybrewery/catalyst:v0.10.0
     restart: unless-stopped
     environment:
       SECRET: 4ef5b29539b70233dd40c02a1799d25079595565e05a193b09da2c3e60ada1cd
