@@ -10,7 +10,7 @@ services:
     networks: [ catalyst ]
 
   catalyst:
-    image: ghcr.io/securitybrewery/catalyst:v0.10.0-rc.5
+    image: ghcr.io/securitybrewery/catalyst:v0.10.0
     restart: unless-stopped
     environment:
       SECRET: "__SECRET__"

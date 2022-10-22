@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# curl -sL "https://raw.githubusercontent.com/SecurityBrewery/catalyst-setup/main/install_catalyst.sh" -o install_catalyst.sh
+# curl -sL "https://raw.githubusercontent.com/SecurityBrewery/catalyst-setup/v0.10.0/install_catalyst.sh" -o install_catalyst.sh
 # bash install_catalyst.sh https://dev.catalyst-soar.com https://dev-authelia.catalyst-soar.com
 
 # if help flag
@@ -42,8 +42,7 @@ INITIAL_API_KEY=$( openssl rand -hex 64 )
 echo "$INITIAL_API_KEY" > INITIAL_API_KEY
 
 # download catalyst setup
-# curl -sL "https://github.com/SecurityBrewery/catalyst-setup/archive/refs/tags/v0.10.0.zip" -o catalyst_install.zip
-curl -sL "https://github.com/SecurityBrewery/catalyst-setup/archive/refs/heads/v0.10.0.zip" -o catalyst_install.zip
+curl -sL "https://github.com/SecurityBrewery/catalyst-setup/archive/refs/tags/v0.10.0.zip" -o catalyst_install.zip
 unzip catalyst_install.zip
 cd "catalyst-setup-0.10.0"
 
