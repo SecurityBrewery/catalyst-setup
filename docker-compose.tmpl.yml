@@ -11,7 +11,7 @@ services:
       - "./nginx/certs:/etc/nginx/certs:ro"
 
   catalyst:
-    image: ghcr.io/securitybrewery/catalyst:v0.10.1
+    image: ghcr.io/securitybrewery/catalyst:v0.10.2
     restart: unless-stopped
     environment:
       SECRET: "__SECRET__"
