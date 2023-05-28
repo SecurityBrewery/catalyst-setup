@@ -1,7 +1,7 @@
 version: '2.2'
 services:
   nginx:
-    image: nginx:1.21
+    image: nginx:1.25
     restart: unless-stopped
     ports: [ "80:80", "443:443" ]
     depends_on: [ catalyst ]
