@@ -34,7 +34,7 @@ services:
     networks: [ catalyst ]
 
   arangodb:
-    image: arangodb/arangodb:3.8.1
+    image: arangodb/arangodb:3.11.4
     restart: unless-stopped
     environment:
       ARANGO_ROOT_PASSWORD: "__ARANGO_ROOT_PASSWORD__"
