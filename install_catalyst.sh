@@ -164,8 +164,7 @@ for user in "${users[@]}"; do
   username=$(echo "$user" | cut -d: -f1)
   password=$(echo "$user" | cut -d: -f2)
   email=$(echo "$user" | cut -d: -f3)
-  argon2_output=$(docker run --rm -i authelia/authelia:4 authelia hash-password -- "$password")
-  argon2_hash=${argon2_output#*Digest: }
+  argon2_output=$(docker run --rm -i authelia/authelia:4 authelia crypto hash generate argon2 --password "$password")  argon2_hash=${argon2_output#*Digest: }
   email=${password#*:}
   {
       echo "  $username:"
